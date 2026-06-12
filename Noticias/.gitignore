@@ -1,0 +1,13 @@
+# Clases compiladas
+out/
+*.class
+
+# Logs y temporales de pruebas
+*.log
+*.pid
+entrada-*.txt
+
+# Configuracion de IDE
+.idea/
+*.iml
+.vscode/
