@@ -20,6 +20,16 @@ import java.util.List;
 public interface NoticiaService extends Remote {
 
     /**
+     * Inicia sesion contra el servidor (login real).
+     *
+     * El admin debe autenticarse con usuario y contrasena; un usuario normal
+     * solo necesita un nombre (la contrasena se ignora). El servidor responde
+     * con status OK si las credenciales son validas, y en {@code getData()}
+     * devuelve un Boolean indicando si el usuario es administrador.
+     */
+    ServerResponse iniciarSesion(String usuario, String password) throws RemoteException;
+
+    /**
      * Devuelve una noticia por su identificador unico.
      * La noticia encontrada viaja dentro de {@link ServerResponse#getData()}.
      */

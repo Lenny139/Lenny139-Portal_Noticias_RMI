@@ -74,6 +74,10 @@ public class ClienteNoticias {
                 case "4": crearNoticia();      break;
                 case "5": modificarNoticia();  break;
                 case "6": eliminarNoticia();   break;
+                case "7":
+                    System.out.println("Cerrando sesion de " + usuario + "...");
+                    login(); // vuelve a la pantalla de login sin cerrar el programa
+                    break;
                 case "0":
                     salir = true;
                     System.out.println("Hasta luego, " + usuario + ".");
@@ -84,14 +88,39 @@ public class ClienteNoticias {
         }
     }
 
+    /**
+     * Login real: el servidor valida las credenciales. La cuenta "admin"
+     * requiere contrasena; cualquier otro usuario entra solo con su nombre.
+     * Se repite hasta que el ingreso sea valido.
+     */
     private void login() {
-        usuario = leer("Nombre de usuario: ").trim();
-        if (usuario.isEmpty()) {
-            usuario = "anonimo";
+        System.out.println("\n----------- INICIAR SESION -----------");
+        while (true) {
+            String user = leer("Usuario: ").trim();
+            if (user.isEmpty()) {
+                System.out.println("Debes ingresar un usuario.\n");
+                continue;
+            }
+            // Solo la cuenta admin pide contrasena.
+            String pass = "";
+            if (user.equalsIgnoreCase("admin")) {
+                pass = leer("Contrasena: ").trim();
+            }
+            try {
+                ServerResponse r = servicio.iniciarSesion(user, pass);
+                if (r.getStatus() == ServerResponse.Status.OK) {
+                    this.usuario = user;
+                    this.esAdmin = Boolean.TRUE.equals(r.getData());
+                    System.out.println(r.getMensaje()
+                            + (esAdmin ? " [rol: administrador]" : " [rol: usuario]") + "\n");
+                    return;
+                }
+                System.out.println("[X] " + r.getMensaje() + " Intenta de nuevo.\n");
+            } catch (RemoteException e) {
+                errorConexion(e);
+                return;
+            }
         }
-        String admin = leer("¿Eres administrador? (s/n): ").trim().toLowerCase();
-        esAdmin = admin.equals("s") || admin.equals("si") || admin.equals("sí");
-        System.out.println("Bienvenido " + usuario + (esAdmin ? " (administrador)" : "") + ".\n");
     }
 
     private void mostrarMenu() {
@@ -102,6 +131,7 @@ public class ClienteNoticias {
         System.out.println(" 4. Crear noticia");
         System.out.println(" 5. Modificar noticia");
         System.out.println(" 6. Eliminar noticia");
+        System.out.println(" 7. Cerrar sesion");
         System.out.println(" 0. Salir");
         System.out.println("--------------------------------------");
     }

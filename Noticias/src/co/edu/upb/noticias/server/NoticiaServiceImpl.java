@@ -29,6 +29,10 @@ public class NoticiaServiceImpl extends UnicastRemoteObject implements NoticiaSe
 
     private static final long serialVersionUID = 1L;
 
+    /** Credenciales del administrador (login real validado en el servidor). */
+    private static final String ADMIN_USUARIO = "admin";
+    private static final String ADMIN_PASSWORD = "admin123";
+
     /** Mapa nombreUnico -> Noticia. */
     private final Map<String, Noticia> noticias = new ConcurrentHashMap<>();
 
@@ -62,6 +66,22 @@ public class NoticiaServiceImpl extends UnicastRemoteObject implements NoticiaSe
         noticias.put(n1.getNombreUnico(), n1);
         noticias.put(n2.getNombreUnico(), n2);
         noticias.put(n3.getNombreUnico(), n3);
+    }
+
+    @Override
+    public ServerResponse iniciarSesion(String usuario, String password) throws RemoteException {
+        if (usuario == null || usuario.isBlank()) {
+            return ServerResponse.notOk("El nombre de usuario no puede estar vacio.");
+        }
+        // La cuenta de administrador exige contrasena correcta.
+        if (usuario.equalsIgnoreCase(ADMIN_USUARIO)) {
+            if (ADMIN_PASSWORD.equals(password)) {
+                return ServerResponse.ok("Bienvenido administrador.", Boolean.TRUE);
+            }
+            return ServerResponse.notOk("Contrasena incorrecta para el administrador.");
+        }
+        // Cualquier otro usuario entra solo con su nombre (rol normal).
+        return ServerResponse.ok("Bienvenido " + usuario + ".", Boolean.FALSE);
     }
 
     @Override
